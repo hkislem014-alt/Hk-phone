@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HK Phone | متجر الآيفون في الجزائر</title>
+<style>
+  :root{
+    --bg:#0f172a; --card:#1e293b; --accent:#38bdf8;
+    --text:#e2e8f0; --muted:#94a3b8; --green:#22c55e;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,sans-serif}
+  body{background:var(--bg);color:var(--text)}
+  header{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:16px 24px;background:#020617;position:sticky;top:0;z-index:10;
+    border-bottom:1px solid #1e293b;
+  }
+  .logo{font-size:24px;font-weight:800;color:var(--accent)}
+  .logo span{color:#fff}
+  .cart-btn{
+    background:var(--accent);color:#082f49;border:none;padding:10px 18px;
+    border-radius:10px;cursor:pointer;font-weight:700;font-size:15px;
+    position:relative;
+  }
+  .cart-count{
+    position:absolute;top:-8px;left:-8px;background:var(--green);color:#fff;
+    border-radius:50%;width:22px;height:22px;font-size:12px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .hero{text-align:center;padding:60px 20px}
+  .hero h1{font-size:36px;margin-bottom:12px}
+  .hero p{color:var(--muted);font-size:18px}
+  .badge{display:inline-block;background:var(--green);color:#fff;padding:6px 16px;border-radius:20px;font-size:14px;margin-top:14px}
+  .products{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+    gap:20px;padding:20px;max-width:1100px;margin:0 auto;
+  }
+  .card{
+    background:var(--card);border-radius:14px;padding:16px;
+    display:flex;flex-direction:column;gap:10px;transition:.2s;
+    border:1px solid #334155;
+  }
+  .card:hover{transform:translateY(-4px);border-color:var(--accent)}
+  .card img{width:100%;height:180px;object-fit:contain;background:#fff;border-radius:10px}
+  .card h3{font-size:17px}
+  .specs{color:var(--muted);font-size:13px}
+  .price{font-size:19px;font-weight:800;color:var(--accent)}
+  .add-btn{
+    background:var(--green);color:#fff;border:none;padding:11px;
+    border-radius:10px;cursor:pointer;font-weight:700;font-size:15px;
+  }
+  .add-btn:hover{opacity:.9}
+  .drawer{
+    position:fixed;top:0;left:-400px;width:360px;height:100%;background:#0b1220;
+    padding:20px;transition:.3s;z-index:20;display:flex;flex-direction:column;
+    border-left:1px solid #334155;
+  }
+  .drawer.open{left:0}
+  .drawer h2{margin-bottom:16px}
+  .close{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;align-self:flex-start}
+  .cart-items{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+  .cart-item{
+    display:flex;justify-content:space-between;align-items:center;
+    background:var(--card);padding:10px;border-radius:10px;font-size:14px;
+  }
+  .cart-item button{background:#ef4444;color:#fff;border:none;border-radius:6px;padding:4px 8px;cursor:pointer}
+  .total{font-size:20px;font-weight:800;margin:16px 0;color:var(--accent)}
+  .checkout{
+    background:var(--green);color:#fff;border:none;padding:14px;
+    border-radius:10px;font-weight:700;font-size:16px;cursor:pointer;
+  }
+  .empty{color:var(--muted);text-align:center;margin-top:40px}
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:15;display:none}
+  .overlay.show{display:block}
+  footer{text-align:center;padding:24px;color:var(--muted);border-top:1px solid #1e293b;margin-top:40px}
+  footer a{color:var(--accent);text-decoration:none}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">HK <span>Phone</span></div>
+  <button class="cart-btn" onclick="toggleCart(true)">🛒 السلة <span class="cart-count" id="count">0</span></button>
+</header>
+
+<div class="hero">
+  <h1>🍎 متجر الآيفون — الجزائر</h1>
+  <p>أحدث هواتف آيفون الأصلية بأسعار منافسة</p>
+  <div class="badge">🇩🇿 توصيل لجميع الولايات</div>
+</div>
+
+<div class="products" id="products"></div>
+
+<div class="overlay" id="overlay" onclick="toggleCart(false)"></div>
+<aside class="drawer" id="drawer">
+  <button class="close" onclick="toggleCart(false)">✕</button>
+  <h2>🛒 سلة الشراء</h2>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="total" id="total"></div>
+  <button class="checkout" onclick="checkout()">إتمام الطلب عبر واتساب</button>
+</aside>
+
+<footer>
+  HK Phone © 2026 — الجزائر<br>
+  للاستفسار: <a href="tel:0781838180">0781838180</a>
+</footer>
+
+<script>
+const products = [
+  {id:1,name:"iPhone 16 Pro Max",specs:"256GB • شريحة A18 Pro • كاميرا 48MP",price:345000,img:"https://fdn2.gsmarena.com/vv/bigpic/apple-iphone-16-pro-max.jpg"},
+  {id:2,name:"iPhone 16 Pro",specs:"128GB • شريحة A18 Pro • تيتانيوم",price:305000,img:"https://fdn2.gsmarena.com/vv/bigpic/apple-iphone-16-pro.jpg"},
+  {id:3,name:"iPhone 16",specs:"128GB • شريحة A18 • أزرار الكاميرا",price:235000,img:"https://fdn2.gsmarena.com/vv/bigpic/apple-iphone-16.jpg"},
+  {id:4,name:"iPhone 15 Pro Max",specs:"256GB • شريحة A17 Pro • تيتانيوم",price:285000,img:"https://fdn2.gsmarena.com/vv/bigpic/apple-iphone-15-pro-max.jpg"},
+  {id:5,name:"iPhone 15",specs:"128GB • شريحة A16 • Dynamic Island",price:195000,img:"https://fdn2.gsmarena.com/vv/bigpic/apple-iphone-15.jpg"},
+  {id:6,name:"iPhone 14 Pro Max",specs:"256GB • شاشة 120Hz • كاميرا 48MP",price:235000,img:"https://fdn2.gsmarena.com/vv/bigpic/apple-iphone-14-pro-max.jpg"},
+  {id:7,name:"iPhone 14",specs:"128GB • شريحة A15 • شاشة 6.1 بوصة",price:155000,img:"https://fdn2.gsmarena.com/vv/bigpic/apple-iphone-14.jpg"},
+  {id:8,name:"iPhone 13",specs:"128GB • شريحة A15 • بطارية ممتازة",price:125000,img:"https://fdn2.gsmarena.com/vv/bigpic/apple-iphone-13.jpg"},
+];
+
+let cart = JSON.parse(localStorage.getItem("hk_cart") || "[]");
+
+function save(){ localStorage.setItem("hk_cart", JSON.stringify(cart)); }
+
+function renderProducts(){
+  document.getElementById("products").innerHTML = products.map(p=>`
+    <div class="card">
+      <img src="${p.img}" alt="${p.name}">
+      <h3>${p.name}</h3>
+      <div class="specs">${p.specs}</div>
+      <div class="price">${p.price.toLocaleString("fr-DZ")} د.ج</div>
+      <button class="add-btn" onclick="addToCart(${p.id})">أضف إلى السلة</button>
+    </div>`).join("");
+}
+
+function addToCart(id){
+  const item = cart.find(i=>i.id===id);
+  if(item) item.qty++;
+  else cart.push({...products.find(p=>p.id===id), qty:1});
+  save(); renderCart(); toggleCart(true);
+}
+
+function removeFromCart(id){
+  cart = cart.filter(i=>i.id!==id);
+  save(); renderCart();
+}
+
+function renderCart(){
+  const box = document.getElementById("cartItems");
+  document.getElementById("count").textContent = cart.reduce((s,i)=>s+i.qty,0);
+  if(!cart.length){
+    box.innerHTML = '<div class="empty">السلة فارغة 🛒</div>';
+    document.getElementById("total").textContent = "";
+    return;
+  }
+  box.innerHTML = cart.map(i=>`
+    <div class="cart-item">
+      <div>${i.name}<br><small>${(i.price*i.qty).toLocaleString("fr-DZ")} د.ج × ${i.qty}</small></div>
+      <button onclick="removeFromCart(${i.id})">حذف</button>
+    </div>`).join("");
+  const total = cart.reduce((s,i)=>s+i.price*i.qty,0);
+  document.getElementById("total").textContent = "الإجمالي: " + total.toLocaleString("fr-DZ") + " د.ج";
+}
+
+function toggleCart(open){
+  document.getElementById("drawer").classList.toggle("open", open);
+  document.getElementById("overlay").classList.toggle("show", open);
+}
+
+function checkout(){
+  if(!cart.length) return alert("السلة فارغة!");
+  let msg = "مرحباً، أريد طلب:%0A%0A";
+  cart.forEach(i=>{ msg += `• ${i.name} × ${i.qty} = ${(i.price*i.qty).toLocaleString("fr-DZ")} د.ج%0A`; });
+  const total = cart.reduce((s,i)=>s+i.price*i.qty,0);
+  msg += `%0Aالإجمالي: ${total.toLocaleString("fr-DZ")} د.ج`;
+  window.open("https://wa.me/213781838180?text=" + msg, "_blank");
+}
+
+renderProducts();
+renderCart();
+</script>
+</body>
+</html>
